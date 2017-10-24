@@ -20,9 +20,12 @@ from django.contrib.auth.views import (
     password_reset,
     password_reset_done,
     password_reset_confirm,
-    password_reset_complete
+    password_reset_complete,
+    password_change,
+    password_change_done
 )
 from collection import views
+from collection.backends import MyRegistrationView
 
 urlpatterns = [
     url(r'^accounts/password/reset/$',
@@ -30,6 +33,16 @@ urlpatterns = [
         {'template_name':
         'registration/password_reset_form.html'},
         name="password_reset"),
+    url(r'^accounts/password/change/$',
+        password_change,
+        {'template_name':
+        'registration/password_change_form.html'},
+        name="password_change"),
+    url(r'^accounts/password/change/done/$',
+        password_change_done,
+        {'template_name':
+        'registration/password_change_done.html'},
+        name="password_change_done"),
     url(r'^accounts/password/reset/done/$',
         password_reset_done,
         {'template_name':
@@ -50,7 +63,12 @@ urlpatterns = [
     url(r'^contact/$', TemplateView.as_view(template_name='contact.html'), name='contact'),
     url(r'^things/(?P<slug>[-\w]+)/$', views.thing_detail, name='thing_detail'),
     url(r'^things/(?P<slug>[-\w]+)/edit/$', views.edit_thing, name='edit_thing'),
+    url(r'^accounts/register/$',
+        MyRegistrationView.as_view(),
+        name='registration_register'),
+    url(r'^accounts/create_thing/$', views.create_thing,
+        name='registration_create_thing'),
     url(r'^accounts/',
-        include('registration.backends.simple.urls')),
+        include('registration.backends.default.urls')),
     url(r'^admin/', admin.site.urls),
 ]

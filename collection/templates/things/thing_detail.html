@@ -4,7 +4,13 @@
 {% endblock title %}
 
 {% block content %}
-  <h2>{{ thing.name }}</h2>
+  <h1>{{ thing.name }}</h1>
   <p>{{ thing.description }}</p>
-  <a href="{% url 'edit_thing' slug=thing.slug %}">Edit me!</>
+  {% if user == thing.user %}
+    <p>
+      <a href="{% url 'edit_thing' slug=thing.slug %}">
+        Edit me!
+      </a>
+    </p>
+  {% endif %}
 {% endblock content %}

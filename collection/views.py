@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect
+from django.template.defaultfilters import slugify
+from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from collection.forms import ThingForm
 from collection.models import Thing
 
@@ -15,9 +18,15 @@ def thing_detail(request, slug):
         'thing': thing,
 })
 
+@login_required
 def edit_thing(request, slug):
     # grab the object
     thing = Thing.objects.get(slug=slug)
+
+    # make sure logged in user is owner of the thing
+    if thing.user != request.user:
+        raise Http404
+
     # set the form
     form_class = ThingForm
 
@@ -37,3 +46,32 @@ def edit_thing(request, slug):
         'thing': thing,
         'form': form,
     })
+
+def create_thing(request):
+    form_class = ThingForm
+
+    # if coming from a submitted form, do this
+    if request.method == 'POST':
+        # grab data from submitted form and apply to form
+        form = form_class(request.POST)
+        if form.is_valid():
+            # create instance but don't save yet
+            thing = form.save(commit=False)
+
+            # set additional details
+            thing.user = request.user
+            thing.slug = slugify(thing.name)
+
+            # save object
+            thing.save()
+
+            # redirect to newly created thing
+            return redirect('thing_detail', slug=thing.slug)
+
+    # otherwise just create form
+    else:
+        form = form_class()
+
+    return render(request, 'things/create_thing.html', {
+        'form': form,
+})
